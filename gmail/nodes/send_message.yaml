@@ -1,0 +1,96 @@
+# Node Configuration - Gmail Send Message
+# Send email via Gmail API
+
+name: send_message
+label:
+  en_US: Send Email
+  vi_VN: Gửi Email
+category: gmail
+description:
+  en_US: Send email via Gmail API
+  vi_VN: Gửi email qua Gmail API
+icon: mail
+
+source: nodes/send_message.py
+provider: google
+
+inputs:
+  - name: to
+    type: string
+    required: true
+    label:
+      en_US: To
+      vi_VN: Đến
+    placeholder:
+      en_US: "recipient@example.com, another@example.com"
+    description:
+      en_US: Recipient email addresses (comma-separated for multiple)
+  
+  - name: subject
+    type: string
+    required: true
+    label:
+      en_US: Subject
+      vi_VN: Tiêu đề
+    placeholder:
+      en_US: "Email subject"
+    description:
+      en_US: Email subject line
+  
+  - name: body
+    type: string
+    required: true
+    label:
+      en_US: Body
+      vi_VN: Nội dung
+    placeholder:
+      en_US: "Email body content"
+    description:
+      en_US: Email body text
+  
+  - name: cc
+    type: string
+    required: false
+    label:
+      en_US: CC
+    placeholder:
+      en_US: "cc@example.com"
+    description:
+      en_US: Carbon copy recipients (comma-separated for multiple)
+  
+  - name: bcc
+    type: string
+    required: false
+    label:
+      en_US: BCC
+    placeholder:
+      en_US: "bcc@example.com"
+    description:
+      en_US: Blind carbon copy recipients (comma-separated for multiple)
+  
+  - name: reply_to
+    type: string
+    required: false
+    label:
+      en_US: Reply-To
+      vi_VN: Trả lời đến
+    placeholder:
+      en_US: "reply@example.com"
+    description:
+      en_US: Reply-to email address
+
+outputs:
+  - name: message_id
+    type: string
+    description:
+      en_US: Gmail message ID
+  
+  - name: thread_id
+    type: string
+    description:
+      en_US: Gmail thread ID
+  
+  - name: status
+    type: string
+    description:
+      en_US: Send status

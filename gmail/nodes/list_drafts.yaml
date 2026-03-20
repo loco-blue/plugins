@@ -1,0 +1,66 @@
+# Node Configuration - Gmail List Drafts
+# List and search draft emails
+
+name: list_drafts
+label:
+  en_US: List Drafts
+  vi_VN: Danh sách Nháp
+category: gmail
+description:
+  en_US: List and search draft emails in Gmail
+  vi_VN: Liệt kê và tìm kiếm email nháp trong Gmail
+icon: file-text
+
+source: nodes/list_drafts.py
+provider: google
+
+inputs:
+  - name: query
+    type: string
+    required: false
+    label:
+      en_US: Search Query
+      vi_VN: Truy vấn Tìm kiếm
+    placeholder:
+      en_US: "subject:urgent"
+    description:
+      en_US: Optional search query to filter drafts (Gmail search syntax)
+  
+  - name: max_results
+    type: number
+    required: false
+    default: 10
+    label:
+      en_US: Max Results
+      vi_VN: Số Kết quả Tối đa
+    placeholder:
+      en_US: "10"
+    description:
+      en_US: Maximum number of drafts to return (1-100, default 10)
+  
+  - name: include_body
+    type: boolean
+    required: false
+    default: false
+    label:
+      en_US: Include Body
+      vi_VN: Bao gồm Nội dung
+    description:
+      en_US: Include draft body and details in results (default false)
+
+outputs:
+  - name: drafts
+    type: array
+    description:
+      en_US: |
+        List of draft objects. Each draft contains:
+        - id: Draft ID
+        - message_id: Associated message ID
+        - subject: Email subject (if include_body=true)
+        - to: Recipients (if include_body=true)
+        - snippet: Preview text (if include_body=true)
+  
+  - name: total
+    type: number
+    description:
+      en_US: Total number of drafts returned

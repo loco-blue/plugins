@@ -1,0 +1,47 @@
+# Node Configuration - Gmail Send Draft
+# Send an existing draft email
+
+name: send_draft
+label:
+  en_US: Send Draft
+  vi_VN: Gửi Email Nháp
+category: gmail
+description:
+  en_US: Send an existing Gmail draft email
+  vi_VN: Gửi email nháp đã tạo sẵn qua Gmail
+icon: mail
+
+source: nodes/send_draft.py
+provider: google
+
+inputs:
+  - name: draft_id
+    type: string
+    required: true
+    label:
+      en_US: Draft ID
+      vi_VN: ID Email Nháp
+    placeholder:
+      en_US: "{{draft_message.draft_id}}"
+    description:
+      en_US: Gmail draft ID to send
+      vi_VN: ID email nháp cần gửi
+
+outputs:
+  - name: message_id
+    type: string
+    description:
+      en_US: Sent message ID
+      vi_VN: ID tin nhắn đã gửi
+  
+  - name: thread_id
+    type: string
+    description:
+      en_US: Thread ID
+      vi_VN: ID chuỗi hội thoại
+  
+  - name: status
+    type: string
+    description:
+      en_US: Send status
+      vi_VN: Trạng thái gửi

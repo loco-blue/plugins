@@ -1,0 +1,56 @@
+# Node Configuration - Gmail Flag Message
+# Star or unstar messages for follow-up
+
+name: flag_message
+label:
+  en_US: Flag Message
+  vi_VN: Đánh dấu Email
+category: gmail
+description:
+  en_US: Star or unstar Gmail messages for follow-up
+  vi_VN: Đánh dấu sao hoặc bỏ đánh dấu email Gmail để theo dõi
+icon: star
+
+source: nodes/flag_message.py
+provider: google
+
+inputs:
+  - name: message_id
+    type: string
+    required: true
+    label:
+      en_US: Message ID
+      vi_VN: ID Email
+    placeholder:
+      en_US: "1234567890abcdef"
+    description:
+      en_US: Gmail message ID to star/unstar
+  
+  - name: action
+    type: select
+    required: true
+    default: star
+    label:
+      en_US: Action
+      vi_VN: Hành động
+    options:
+      - star
+      - unstar
+    description:
+      en_US: Action to perform (star to add flag, unstar to remove flag)
+
+outputs:
+  - name: message_id
+    type: string
+    description:
+      en_US: Gmail message ID
+  
+  - name: labels
+    type: array
+    description:
+      en_US: Updated list of label IDs for the message
+  
+  - name: status
+    type: string
+    description:
+      en_US: Operation status (starred or unstarred)

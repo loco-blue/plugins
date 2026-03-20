@@ -1,0 +1,71 @@
+# Node Configuration - Gmail Add Attachment To Draft
+# Add file attachments to existing draft email
+
+name: add_attachment_to_draft
+label:
+  en_US: Add Attachment To Draft
+  vi_VN: Thêm File Đính Kèm
+category: gmail
+description:
+  en_US: Add file attachments to existing Gmail draft (max 25MB per file)
+  vi_VN: Thêm file đính kèm vào email nháp Gmail (tối đa 25MB/file)
+icon: paperclip
+
+source: nodes/add_attachment_to_draft.py
+provider: google
+
+inputs:
+  - name: draft_id
+    type: string
+    required: true
+    label:
+      en_US: Draft ID
+      vi_VN: ID Email Nháp
+    placeholder:
+      en_US: "{{draft_message.draft_id}}"
+    description:
+      en_US: Gmail draft ID from draft_message node
+      vi_VN: ID email nháp từ node draft_message
+  
+  - name: file_to_attach
+    type: file
+    required: true
+    label:
+      en_US: File to Attach
+      vi_VN: File Đính Kèm
+    placeholder:
+      en_US: "{{start.document}}"
+    description:
+      en_US: File(s) to attach - single file or array of files (max 25MB each)
+      vi_VN: File(s) để đính kèm - một file hoặc mảng files (tối đa 25MB mỗi file)
+
+outputs:
+  - name: draft_id
+    type: string
+    description:
+      en_US: Updated draft ID
+  
+  - name: message_id
+    type: string
+    description:
+      en_US: Updated message ID
+  
+  - name: attachments_added
+    type: number
+    description:
+      en_US: Number of attachments added
+  
+  - name: total_size
+    type: number
+    description:
+      en_US: Total size of attachments in bytes
+  
+  - name: filenames
+    type: array
+    description:
+      en_US: List of attached filenames
+  
+  - name: status
+    type: string
+    description:
+      en_US: Operation status

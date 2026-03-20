@@ -1,0 +1,43 @@
+# Node Configuration - Gmail Get Message
+# Get detailed message information
+
+name: get_message
+label:
+  en_US: Get Message
+  vi_VN: Lấy Email
+category: gmail
+description:
+  en_US: Get detailed information about a Gmail message including body and attachments
+  vi_VN: Lấy thông tin chi tiết về email Gmail bao gồm nội dung và đính kèm
+icon: mail-open
+
+source: nodes/get_message.py
+provider: google
+
+inputs:
+  - name: message_id
+    type: string
+    required: true
+    label:
+      en_US: Message ID
+      vi_VN: ID Email
+    placeholder:
+      en_US: "1234567890abcdef"
+    description:
+      en_US: Gmail message ID
+
+outputs:
+  - name: message
+    type: object
+    description:
+      en_US: |
+        Detailed message object containing:
+        - id: Message ID
+        - thread_id: Thread ID
+        - label_ids: List of label IDs
+        - snippet: Short preview
+        - size_estimate: Estimated size in bytes
+        - internal_date: Timestamp
+        - headers: Email headers (subject, from, to, cc, date, message_id)
+        - body: Email body text
+        - attachments: List of attachment objects (filename, mime_type, size, attachment_id)

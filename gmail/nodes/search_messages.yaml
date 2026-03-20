@@ -1,0 +1,80 @@
+# Node Configuration - Gmail Search Messages
+# Search emails using Gmail query operators
+
+name: search_messages
+label:
+  en_US: Search Messages
+  vi_VN: Tìm kiếm Email
+category: gmail
+description:
+  en_US: Search emails using Gmail query operators (from:, to:, subject:, after:, before:, has:, is:)
+  vi_VN: Tìm kiếm email sử dụng query operators của Gmail
+icon: search
+
+source: nodes/search_messages.py
+provider: google
+
+inputs:
+  - name: query
+    type: string
+    required: false
+    default: ""
+    label:
+      en_US: Search Query
+      vi_VN: Truy vấn tìm kiếm
+    placeholder:
+      en_US: "from:user@example.com subject:important"
+    description:
+      en_US: |
+        Gmail search query using operators:
+        - from:user@example.com - From specific sender
+        - to:user@example.com - To specific recipient
+        - subject:keyword - Subject contains keyword
+        - after:2024/01/01 - After specific date
+        - before:2024/12/31 - Before specific date
+        - has:attachment - Has attachments
+        - is:unread - Unread messages
+        - is:starred - Starred messages
+        - label:Important - Has specific label
+  
+  - name: max_results
+    type: number
+    required: false
+    default: 10
+    label:
+      en_US: Max Results
+      vi_VN: Số kết quả tối đa
+    description:
+      en_US: Maximum number of results to return (1-100)
+  
+  - name: include_spam_trash
+    type: boolean
+    required: false
+    default: false
+    label:
+      en_US: Include Spam/Trash
+      vi_VN: Bao gồm Spam/Thùng rác
+    description:
+      en_US: Include messages from Spam and Trash folders
+
+outputs:
+  - name: messages
+    type: array
+    description:
+      en_US: |
+        List of matching messages with details:
+        - id: Message ID
+        - thread_id: Thread ID
+        - subject: Email subject
+        - from: Sender email
+        - to: Recipient email
+        - date: Date sent
+        - snippet: Email preview
+        - labels: Gmail labels
+        - body: Email body text
+        - attachments: Number of attachments
+  
+  - name: total_results
+    type: number
+    description:
+      en_US: Total number of matching messages

@@ -1,0 +1,61 @@
+# Provider Configuration - Google OAuth
+# This file defines OAuth configuration for Google services
+
+identity:
+  name: google
+  author: loco
+  icon: google.svg
+  label:
+    en_US: Google
+  description:
+    en_US: google authentication provider
+
+auth_type: oauth2
+
+oauth_schema:
+  client_schema:
+    - name: client_id
+      type: string
+      required: true
+      label:
+        en_US: Google OAuth Client ID
+      description:
+        en_US: OAuth 2.0 Client ID from Google Cloud Console
+    
+    - name: client_secret
+      type: secret
+      required: true
+      label:
+        en_US: Google OAuth Client Secret
+      description:
+        en_US: OAuth 2.0 Client Secret from Google Cloud Console
+  
+  authorization_url: "https://accounts.google.com/o/oauth2/v2/auth"
+  token_url: "https://oauth2.googleapis.com/token"
+  revoke_url: "https://oauth2.googleapis.com/revoke"
+  
+  # Gmail API scopes - comprehensive access for all operations
+  scopes:
+    - "https://www.googleapis.com/auth/gmail.readonly"
+    - "https://www.googleapis.com/auth/gmail.send"
+    - "https://www.googleapis.com/auth/gmail.compose"
+    - "https://www.googleapis.com/auth/gmail.modify"
+    - "https://www.googleapis.com/auth/gmail.labels"
+  
+  flow_config:
+    token_response_type: json
+    client_auth_method: body
+    auth_extra_params:
+      access_type: "offline"
+      prompt: "consent"
+    token_expires: true
+    pkce:
+      enabled: true
+      method: S256
+    user_info:
+      url: "https://www.googleapis.com/oauth2/v2/userinfo"
+      method: GET
+      name_field: "name"
+      email_field: "email"
+      avatar_field: "picture"
+      id_field: "id"

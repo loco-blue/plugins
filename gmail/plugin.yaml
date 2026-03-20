@@ -1,0 +1,54 @@
+# Plugin Metadata
+name: gmail
+version: 0.1.3
+type: node
+author: loco
+label:
+  en_US: Gmail
+description:
+  en_US: Gmail API integration - Send emails, search messages, manage drafts
+icon: icon.svg
+license: MIT
+
+# Dependencies
+dependencies:
+  python:
+    loco-sdk: ">=0.2.2"
+    httpx: ">=0.27.0"
+
+# Permissions
+permissions:
+  - workflow:execute
+
+# Plugin-Level Configuration (shared across all nodes)
+# These configs are available to all nodes in the plugin
+config_schema:
+  # - name: default_config
+  #   type: text
+  #   required: false
+  #   label:
+  #     en_US: Default Configuration
+  #   placeholder:
+  #     en_US: Enter default value
+  #   description:
+  #     en_US: Shared configuration for all nodes
+
+# Authentication Provider Definitions
+auth:
+  - auth/google.yaml
+
+# Node Definitions
+# Each node configuration is in a separate YAML file in the nodes/ directory
+nodes:
+  - nodes/add_attachment_to_draft.yaml
+  - nodes/draft_message.yaml
+  - nodes/flag_message.yaml
+  - nodes/get_message.yaml
+  - nodes/list_drafts.yaml
+  - nodes/search_messages.yaml
+  - nodes/send_draft.yaml
+  - nodes/send_message.yaml
+
+# Version Requirements
+loco_version: ">=0.1.0"
+python_version: ">=3.10"

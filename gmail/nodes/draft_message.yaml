@@ -1,0 +1,104 @@
+# Node Configuration - Gmail Draft Message
+# Create draft email (text only, no attachments)
+
+name: draft_message
+label:
+  en_US: Draft Message
+  vi_VN: Soạn Email Nháp
+category: gmail
+description:
+  en_US: Create draft email with Gmail API (text only, attachments added separately)
+  vi_VN: Tạo email nháp qua Gmail API (chỉ văn bản, file đính kèm thêm riêng)
+icon: mail
+
+source: nodes/draft_message.py
+provider: google
+
+inputs:
+  - name: to
+    type: string
+    required: true
+    label:
+      en_US: To
+      vi_VN: Đến
+    placeholder:
+      en_US: "recipient@example.com"
+    description:
+      en_US: Recipient email address(es), comma-separated for multiple
+      vi_VN: Địa chỉ email người nhận (phân cách bằng dấu phẩy nếu nhiều người)
+  
+  - name: subject
+    type: string
+    required: false
+    default: ""
+    label:
+      en_US: Subject
+      vi_VN: Tiêu đề
+    placeholder:
+      en_US: "Email subject"
+    description:
+      en_US: Email subject line
+      vi_VN: Tiêu đề email
+  
+  - name: body
+    type: string
+    required: false
+    default: ""
+    label:
+      en_US: Body
+      vi_VN: Nội dung
+    placeholder:
+      en_US: "Email body text"
+    description:
+      en_US: Email body content (plain text)
+      vi_VN: Nội dung email (văn bản thuần)
+  
+  - name: cc
+    type: string
+    required: false
+    label:
+      en_US: CC
+    placeholder:
+      en_US: "cc@example.com"
+    description:
+      en_US: Carbon copy recipients (comma-separated for multiple)
+      vi_VN: Người nhận bản sao (phân cách bằng dấu phẩy nếu nhiều người)
+  
+  - name: bcc
+    type: string
+    required: false
+    label:
+      en_US: BCC
+    placeholder:
+      en_US: "bcc@example.com"
+    description:
+      en_US: Blind carbon copy recipients (comma-separated for multiple)
+      vi_VN: Người nhận bản sao ẩn (phân cách bằng dấu phẩy nếu nhiều người)
+  
+  - name: reply_to
+    type: string
+    required: false
+    label:
+      en_US: Reply-To
+      vi_VN: Trả lời đến
+    placeholder:
+      en_US: "reply@example.com"
+    description:
+      en_US: Reply-to email address
+      vi_VN: Địa chỉ email để trả lời
+
+outputs:
+  - name: draft_id
+    type: string
+    description:
+      en_US: Gmail draft ID
+  
+  - name: message_id
+    type: string
+    description:
+      en_US: Gmail message ID
+  
+  - name: status
+    type: string
+    description:
+      en_US: Operation status
