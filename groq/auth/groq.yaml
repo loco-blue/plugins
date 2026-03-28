@@ -1,0 +1,20 @@
+identity:
+  name: groq
+  label:
+    en_US: Groq
+    vi_VN: Groq
+
+auth_type: api_key
+
+credentials_schema:
+  - name: api_key
+    type: secret
+    required: true
+    label:
+      en_US: API Key
+      vi_VN: Khóa API
+    description:
+      en_US: Your Groq API key
+      vi_VN: Khóa API Groq của bạn
+    placeholder:
+      en_US: Enter your API key

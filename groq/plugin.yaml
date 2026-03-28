@@ -1,0 +1,51 @@
+# Plugin Metadata
+name: groq
+version: 0.1.0
+type: node
+author: loco
+label:
+  en_US: Groq
+description:
+  en_US: A node plugin for Loco
+icon: icon.svg
+license: MIT
+
+# Dependencies
+dependencies:
+  python:
+    loco-sdk: ">=0.2.5"
+    pydantic: ">=2.0.0"
+    groq: ">=0.4.0"
+
+# Permissions
+permissions:
+  - workflow:execute
+
+# Plugin-Level Configuration (shared across all nodes)
+# These configs are available to all nodes in the plugin
+# config_schema:
+#   - name: default_config
+#     type: string
+#     required: false
+#     label:
+#       en_US: Default Configuration
+#     placeholder:
+#       en_US: Enter default value
+#     description:
+#       en_US: Shared configuration for all nodes
+
+# Node Definitions
+# Each node configuration is in a separate YAML file in the nodes/ directory
+# nodes:
+#   - nodes/groq.yaml
+
+# Authentication Provider Definitions
+auth:
+  - auth/groq.yaml
+
+ai:
+  - ai/groq.yaml
+
+# Version Requirements
+loco_version: ">=0.1.0"
+python_version: ">=3.10"

@@ -1,0 +1,158 @@
+name: groq
+label:
+  en_US: Groq
+  vi_VN: Groq
+description:
+  en_US: Groq AI Provider
+  vi_VN: Groq AI Provider
+icon: icon.svg
+
+source: ai/provider.py
+provider: groq
+
+models:
+  - model: compound-beta
+    label:
+      en_US: Groq Compound
+    type: llm
+    features:
+      - tool_call
+      - structured_output
+    properties:
+      context_window: 131072
+      max_output_tokens: 8192
+    pricing:
+      input_per_1m: 1.0
+      output_per_1m: 3.0
+
+  - model: compound-beta-mini
+    label:
+      en_US: Groq Compound Mini
+    type: llm
+    features:
+      - structured_output
+    properties:
+      context_window: 131072
+      max_output_tokens: 8192
+    pricing:
+      input_per_1m: 0.50
+      output_per_1m: 1.50
+
+  - model: llama-3.1-8b-instant
+    label:
+      en_US: Llama 3.1 8B Instant
+    type: llm
+    features:
+      - tool_call
+    properties:
+      context_window: 131072
+      max_output_tokens: 131072
+    pricing:
+      input_per_1m: 0.05
+      output_per_1m: 0.08
+
+  - model: llama-3.3-70b-versatile
+    label:
+      en_US: Llama 3.3 70B Versatile
+    type: llm
+    features:
+      - tool_call
+      - structured_output
+    properties:
+      context_window: 131072
+      max_output_tokens: 32768
+    pricing:
+      input_per_1m: 0.59
+      output_per_1m: 0.79
+
+  - model: meta-llama/llama-4-scout-17b-16e-instruct
+    label:
+      en_US: Llama 4 Scout 17B Instruct
+    type: llm
+    features:
+      - tool_call
+    properties:
+      context_window: 131072
+      max_output_tokens: 8192
+    pricing:
+      input_per_1m: 0.11
+      output_per_1m: 0.34
+
+  - model: openai/gpt-oss-20b
+    label:
+      en_US: GPT OSS 20B
+    type: llm
+    features:
+      - tool_call
+      - structured_output
+    properties:
+      context_window: 131072
+      max_output_tokens: 65536
+    pricing:
+      input_per_1m: 0.075
+      output_per_1m: 0.30
+
+  - model: openai/gpt-oss-120b
+    label:
+      en_US: GPT OSS 120B
+    type: llm
+    features:
+      - tool_call
+      - structured_output
+    properties:
+      context_window: 131072
+      max_output_tokens: 65536
+    pricing:
+      input_per_1m: 0.15
+      output_per_1m: 0.60
+
+  - model: qwen/qwen3-32b
+    label:
+      en_US: Qwen 3 32B
+    type: llm
+    features:
+      - tool_call
+      - structured_output
+    properties:
+      context_window: 131072
+      max_output_tokens: 40960
+    pricing:
+      input_per_1m: 0.29
+      output_per_1m: 0.59
+
+  - model: moonshotai/kimi-k2-instruct
+    label:
+      en_US: Kimi K2 Instruct
+    type: llm
+    features:
+      - tool_call
+    properties:
+      context_window: 131072
+      max_output_tokens: 16384
+    pricing:
+      input_per_1m: 1.00
+      output_per_1m: 3.00
+
+  - model: moonshotai/kimi-k2-instruct-0905
+    label:
+      en_US: Kimi K2 Instruct (0905)
+    type: llm
+    features:
+      - tool_call
+    properties:
+      context_window: 262144
+      max_output_tokens: 16384
+    pricing:
+      input_per_1m: 1.00
+      output_per_1m: 3.00
+
+  - model: allam-2-7b
+    label:
+      en_US: Allam 2 7B
+    type: llm
+    properties:
+      context_window: 4096
+      max_output_tokens: 4096
+    pricing:
+      input_per_1m: 0.05
+      output_per_1m: 0.08
