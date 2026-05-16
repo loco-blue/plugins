@@ -91,6 +91,38 @@ class GroqProvider(AIProviderPlugin):
             self._credentials = old_credentials
             return False
 
+    def _normalize_messages(
+        self, messages: list[Message]
+    ) -> list[dict[str, Any]]:
+        """Serialize messages to Groq-compatible dicts.
+
+        Groq requires image_url to be an object {"url": "..."}, not a string.
+        Wraps any image_url string values before dumping.
+        """
+        result: list[dict[str, Any]] = []
+        for msg in messages:
+            dumped = msg.model_dump(exclude_none=True)
+            content = dumped.get("content")
+            if isinstance(content, list):
+                normalized: list[dict[str, Any]] = []
+                for part in content:
+                    if part.get("type") == "image_url":
+                        image_url = part.get("image_url")
+                        if isinstance(image_url, str):
+                            normalized.append(
+                                {
+                                    "type": "image_url",
+                                    "image_url": {"url": image_url},
+                                }
+                            )
+                        else:
+                            normalized.append(part)
+                    else:
+                        normalized.append(part)
+                dumped["content"] = normalized
+            result.append(dumped)
+        return result
+
     async def invoke(
         self,
         model: str,
@@ -106,7 +138,7 @@ class GroqProvider(AIProviderPlugin):
         client = self._get_client()
 
         # Serialize typed objects to dicts for Groq client
-        raw_messages = [m.model_dump(exclude_none=True) for m in messages]
+        raw_messages = self._normalize_messages(messages)
         raw_tools = (
             [t.model_dump(exclude_none=True) for t in tools] if tools else None
         )
@@ -189,7 +221,7 @@ class GroqProvider(AIProviderPlugin):
         client = self._get_client()
 
         # Serialize typed objects to dicts for Groq client
-        raw_messages = [m.model_dump(exclude_none=True) for m in messages]
+        raw_messages = self._normalize_messages(messages)
 
         # Build parameters
         temperature = kwargs.get("temperature", 0.7)
