@@ -16,7 +16,6 @@ models:
       en_US: Groq Compound
     type: llm
     features:
-      - tool_call
       - structured_output
     properties:
       context_window: 131072

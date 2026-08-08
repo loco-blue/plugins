@@ -1,15 +1,16 @@
 """Tests for Groq AI provider."""
 
 import pytest
+from groq import APIError
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from ai.provider import Groq
+from ai.provider import GroqProvider
 
 
 @pytest.fixture
 def provider():
     """Create provider instance with test credentials."""
-    provider = Groq()
+    provider = GroqProvider()
     provider._credentials = {"api_key": "test-api-key"}
     return provider
 
@@ -103,6 +104,69 @@ class TestLLMStream:
         # assert len(chunks) > 0
         # assert "delta" in chunks[0]
         pytest.skip("Implement streaming test")
+
+
+class TestStreamToolHallucination:
+    """Groq validates tool-call names server-side and aborts the SSE
+    stream with an APIError when the model calls a tool that wasn't in
+    request.tools, instead of returning a normal completion. stream()
+    must recover from this so the agent's existing unknown-tool
+    self-correction path (agent.py) gets a chance to run instead of the
+    whole turn failing.
+    """
+
+    async def test_recovers_hallucinated_tool_call(self, provider, mock_client):
+        """A mid-stream tool-validation APIError yields a synthetic tool
+        call instead of propagating, so the caller can self-correct."""
+
+        async def fake_stream():
+            raise APIError(
+                "tool call validation failed: attempted to call tool "
+                "'brute_force' which was not in request.tools",
+                request=MagicMock(),
+                body=None,
+            )
+            yield  # pragma: no cover - makes this an async generator
+
+        mock_client.chat.completions.create = AsyncMock(
+            return_value=fake_stream()
+        )
+
+        with patch.object(provider, "_get_client", return_value=mock_client):
+            chunks = [
+                chunk
+                async for chunk in provider.stream(
+                    model="llama-3.1-8b-instant",
+                    messages=[],
+                    tools=[],
+                )
+            ]
+
+        assert len(chunks) == 1
+        tool_calls = chunks[0].delta.tool_calls
+        assert tool_calls is not None
+        assert tool_calls[0].function.name == "brute_force"
+
+    async def test_reraises_unrelated_api_errors(self, provider, mock_client):
+        """Other Groq API errors (rate limit, auth, etc.) must still
+        propagate — only the tool-validation abort is recovered from."""
+
+        async def fake_stream():
+            raise APIError(
+                "rate limit exceeded", request=MagicMock(), body=None
+            )
+            yield  # pragma: no cover - makes this an async generator
+
+        mock_client.chat.completions.create = AsyncMock(
+            return_value=fake_stream()
+        )
+
+        with patch.object(provider, "_get_client", return_value=mock_client):
+            with pytest.raises(APIError):
+                async for _ in provider.stream(
+                    model="llama-3.1-8b-instant", messages=[], tools=[]
+                ):
+                    pass
 
 
 class TestModelDiscovery:

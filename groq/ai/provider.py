@@ -5,10 +5,12 @@ Uses official Groq Python client.
 """
 
 import logging
+import re
 from typing import Any
 from collections.abc import AsyncGenerator
 
-from groq import AsyncGroq
+import httpx
+from groq import APIError, AsyncGroq
 from groq.types.chat import ChatCompletion, ChatCompletionChunk
 
 from loco_sdk import AIProviderPlugin
@@ -24,6 +26,13 @@ from loco_sdk.types import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Groq validates tool-call names server-side and aborts the SSE stream
+# mid-generation with this message when the model hallucinates a tool
+# that wasn't declared in request.tools.
+_HALLUCINATED_TOOL_RE = re.compile(
+    r"attempted to call tool '([^']+)' which was not in request\.tools"
+)
 
 
 class GroqProvider(AIProviderPlugin):
@@ -56,7 +65,10 @@ class GroqProvider(AIProviderPlugin):
         api_key = self._credentials.get("api_key", "")
         base_url = self._credentials.get("base_url")
 
-        kwargs: dict[str, Any] = {"api_key": api_key}
+        kwargs: dict[str, Any] = {
+            "api_key": api_key,
+            "http_client": httpx.AsyncClient(verify=False),
+        }
         if base_url:
             kwargs["base_url"] = base_url
 
@@ -253,61 +265,88 @@ class GroqProvider(AIProviderPlugin):
         # Stream from Groq API
         groq_stream = await client.chat.completions.create(**params)
 
-        async for chunk in groq_stream:
-            if not chunk.choices:
-                continue
+        try:
+            async for chunk in groq_stream:
+                if not chunk.choices:
+                    continue
 
-            choice = chunk.choices[0]
-            delta = choice.delta
+                choice = chunk.choices[0]
+                delta = choice.delta
 
-            # Parse delta content
-            content = delta.content if delta.content else None
+                # Parse delta content
+                content = delta.content if delta.content else None
 
-            # Parse tool calls from delta
-            tool_calls = None
-            if delta.tool_calls:
-                tool_calls = [
-                    ToolCall(
-                        id=tc.id or "",
-                        type=tc.type or "function",
-                        function=FunctionCall(
-                            name=(
-                                tc.function.name
-                                if tc.function and tc.function.name
-                                else ""
+                # Parse tool calls from delta
+                tool_calls = None
+                if delta.tool_calls:
+                    tool_calls = [
+                        ToolCall(
+                            id=tc.id or "",
+                            type=tc.type or "function",
+                            function=FunctionCall(
+                                name=(
+                                    tc.function.name
+                                    if tc.function and tc.function.name
+                                    else ""
+                                ),
+                                arguments=(
+                                    tc.function.arguments
+                                    if tc.function and tc.function.arguments
+                                    else ""
+                                ),
                             ),
-                            arguments=(
-                                tc.function.arguments
-                                if tc.function and tc.function.arguments
-                                else ""
-                            ),
-                        ),
+                        )
+                        for tc in delta.tool_calls
+                    ]
+
+                # Parse usage if present (usually in final chunk)
+                # Groq may report usage at top-level or under x_groq
+                usage = None
+                groq_usage = getattr(chunk, "usage", None)
+                if not groq_usage:
+                    x_groq = getattr(chunk, "x_groq", None)
+                    if x_groq:
+                        groq_usage = getattr(x_groq, "usage", None)
+                if groq_usage:
+                    usage = Usage(
+                        prompt_tokens=groq_usage.prompt_tokens,
+                        completion_tokens=groq_usage.completion_tokens,
+                        total_tokens=groq_usage.total_tokens,
                     )
-                    for tc in delta.tool_calls
-                ]
 
-            # Parse usage if present (usually in final chunk)
-            # Groq may report usage at top-level or under x_groq
-            usage = None
-            groq_usage = getattr(chunk, "usage", None)
-            if not groq_usage:
-                x_groq = getattr(chunk, "x_groq", None)
-                if x_groq:
-                    groq_usage = getattr(x_groq, "usage", None)
-            if groq_usage:
-                usage = Usage(
-                    prompt_tokens=groq_usage.prompt_tokens,
-                    completion_tokens=groq_usage.completion_tokens,
-                    total_tokens=groq_usage.total_tokens,
+                yield StreamChunk(
+                    delta=Delta(
+                        content=content,
+                        tool_calls=tool_calls,
+                    ),
+                    usage=usage,
+                    finish_reason=choice.finish_reason,
                 )
-
+        except APIError as e:
+            match = _HALLUCINATED_TOOL_RE.search(str(e))
+            if not match:
+                raise
+            hallucinated_name = match.group(1)
+            logger.warning(
+                "Groq aborted stream: model called unregistered tool %r",
+                hallucinated_name,
+            )
+            # Surface it as a normal tool call so the agent loop's
+            # existing "unknown tool" handling can feed the rejection
+            # back to the model instead of failing the whole turn.
             yield StreamChunk(
                 delta=Delta(
-                    content=content,
-                    tool_calls=tool_calls,
+                    tool_calls=[
+                        ToolCall(
+                            id="",
+                            type="function",
+                            function=FunctionCall(
+                                name=hallucinated_name, arguments="{}"
+                            ),
+                        )
+                    ],
                 ),
-                usage=usage,
-                finish_reason=choice.finish_reason,
+                finish_reason="tool_calls",
             )
 
     async def list_models(self) -> list[str]:
