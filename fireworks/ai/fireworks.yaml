@@ -1,0 +1,268 @@
+name: fireworks
+label:
+  en_US: Fireworks AI
+  vi_VN: Fireworks AI
+description:
+  en_US: Fireworks AI Provider — LLM, embedding, and rerank models
+  vi_VN: Fireworks AI Provider — mô hình LLM, embedding và rerank
+icon: icon.png
+
+source: ai/provider.py
+provider: fireworks
+
+models:
+  # ── LLMs ──────────────────────────────────────────────
+  - model: accounts/fireworks/models/deepseek-v4-flash
+    label:
+      en_US: DeepSeek V4 Flash
+    type: llm
+    features:
+      - streaming
+      - tool_call
+      - multi_tool_call
+      - structured_output
+      - fine_tuning
+    properties:
+      context_window: 1048576
+      max_output_tokens: 32768
+    pricing:
+      input_per_1m: 0.14
+      output_per_1m: 0.28
+
+  - model: accounts/fireworks/models/deepseek-v4-pro
+    label:
+      en_US: DeepSeek V4 Pro
+    type: llm
+    features:
+      - streaming
+      - tool_call
+      - multi_tool_call
+      - structured_output
+      - thinking
+      - fine_tuning
+    properties:
+      context_window: 1048576
+      max_output_tokens: 32768
+    pricing:
+      input_per_1m: 1.74
+      output_per_1m: 3.48
+
+  - model: accounts/fireworks/models/kimi-k2p6
+    label:
+      en_US: Kimi K2.6
+    type: llm
+    features:
+      - streaming
+      - tool_call
+      - multi_tool_call
+      - structured_output
+      - document
+    properties:
+      context_window: 262144
+      max_output_tokens: 16384
+    pricing:
+      input_per_1m: 0.95
+      output_per_1m: 4.00
+
+  - model: accounts/fireworks/models/kimi-k3
+    label:
+      en_US: Kimi K3
+    type: llm
+    features:
+      - streaming
+      - tool_call
+      - multi_tool_call
+      - vision
+      - structured_output
+      - thinking
+      - document
+    properties:
+      context_window: 1048576
+      max_output_tokens: 32768
+    pricing:
+      input_per_1m: 3.00
+      output_per_1m: 15.00
+
+  - model: accounts/fireworks/models/gpt-oss-20b
+    label:
+      en_US: GPT OSS 20B
+    type: llm
+    features:
+      - streaming
+      - tool_call
+      - structured_output
+      - fine_tuning
+    properties:
+      context_window: 131072
+      max_output_tokens: 65536
+    pricing:
+      input_per_1m: 0.07
+      output_per_1m: 0.30
+
+  - model: accounts/fireworks/models/gpt-oss-120b
+    label:
+      en_US: GPT OSS 120B
+    type: llm
+    features:
+      - streaming
+      - tool_call
+      - multi_tool_call
+      - structured_output
+      - fine_tuning
+    properties:
+      context_window: 131072
+      max_output_tokens: 65536
+    pricing:
+      input_per_1m: 0.15
+      output_per_1m: 0.60
+
+  - model: accounts/fireworks/models/qwen3p7-plus
+    label:
+      en_US: Qwen 3.7 Plus
+    type: llm
+    features:
+      - streaming
+      - tool_call
+      - multi_tool_call
+      - vision
+      - structured_output
+      - document
+      - fine_tuning
+    properties:
+      context_window: 262144
+      max_output_tokens: 16384
+    pricing:
+      input_per_1m: 0.40
+      output_per_1m: 1.60
+
+  - model: accounts/fireworks/models/glm-5p2
+    label:
+      en_US: GLM 5.2
+    type: llm
+    features:
+      - streaming
+      - tool_call
+      - multi_tool_call
+      - structured_output
+      - thinking
+      - document
+    properties:
+      context_window: 1048576
+      max_output_tokens: 32768
+    pricing:
+      input_per_1m: 1.40
+      output_per_1m: 4.40
+
+  - model: accounts/fireworks/models/minimax-m3
+    label:
+      en_US: MiniMax M3
+    type: llm
+    features:
+      - streaming
+      - tool_call
+      - structured_output
+      - document
+    properties:
+      context_window: 524288
+      max_output_tokens: 16384
+    pricing:
+      input_per_1m: 0.30
+      output_per_1m: 1.20
+
+  # ── Embeddings ────────────────────────────────────────
+  - model: accounts/fireworks/models/qwen3-embedding-8b
+    label:
+      en_US: Qwen3 Embedding 8B
+    type: embedding
+    features: []
+    properties:
+      context_window: 40960
+      max_output_tokens: 40960
+    pricing:
+      input_per_1m: 0.10
+      output_per_1m: 0.00
+
+  - model: accounts/fireworks/models/bge-large-en-v1p5
+    label:
+      en_US: BAAI BGE Large EN v1.5
+    type: embedding
+    features: []
+    properties:
+      context_window: 512
+      max_output_tokens: 512
+    pricing:
+      input_per_1m: 0.02
+      output_per_1m: 0.00
+
+  - model: accounts/fireworks/models/multilingual-e5-large-instruct
+    label:
+      en_US: Multilingual E5 Large Instruct
+    type: embedding
+    features: []
+    properties:
+      context_window: 512
+      max_output_tokens: 512
+    pricing:
+      input_per_1m: 0.02
+      output_per_1m: 0.00
+
+  - model: accounts/fireworks/models/nomic-embed-text-v1p5
+    label:
+      en_US: Nomic Embed Text v1.5
+    type: embedding
+    features: []
+    properties:
+      context_window: 8192
+      max_output_tokens: 8192
+    pricing:
+      input_per_1m: 0.01
+      output_per_1m: 0.00
+
+  - model: accounts/fireworks/models/voyage-4
+    label:
+      en_US: Voyage AI 4
+    type: embedding
+    features: []
+    properties:
+      context_window: 32768
+      max_output_tokens: 32768
+    pricing:
+      input_per_1m: 0.12
+      output_per_1m: 0.00
+
+  # ── Reranking ─────────────────────────────────────────
+  - model: accounts/fireworks/models/qwen3-reranker-8b
+    label:
+      en_US: Qwen3 Reranker 8B
+    type: rerank
+    features: []
+    properties:
+      context_window: 40960
+      max_output_tokens: 40960
+    pricing:
+      input_per_1m: 0.20
+      output_per_1m: 0.00
+
+  - model: accounts/fireworks/models/mxbai-rerank-large-v2
+    label:
+      en_US: Mxbai Rerank Large V2
+    type: rerank
+    features: []
+    properties:
+      context_window: 512
+      max_output_tokens: 512
+    pricing:
+      input_per_1m: 0.10
+      output_per_1m: 0.00
+
+  - model: accounts/fireworks/models/voyage-rerank-2-5
+    label:
+      en_US: Voyage Rerank 2.5
+    type: rerank
+    features: []
+    properties:
+      context_window: 32768
+      max_output_tokens: 32768
+    pricing:
+      input_per_1m: 0.15
+      output_per_1m: 0.00

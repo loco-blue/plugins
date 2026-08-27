@@ -1,0 +1,20 @@
+identity:
+  name: fireworks
+  label:
+    en_US: Fireworks AI
+    vi_VN: Fireworks AI
+
+auth_type: api_key
+
+credentials_schema:
+  - name: api_key
+    type: secret
+    required: true
+    label:
+      en_US: API Key
+      vi_VN: Khóa API
+    description:
+      en_US: Your Fireworks AI API key
+      vi_VN: Khóa API Fireworks AI của bạn
+    placeholder:
+      en_US: Enter your API key

@@ -1,0 +1,34 @@
+# Plugin Metadata
+name: fireworks
+version: 0.1.1
+type: node
+author: loco
+label:
+  en_US: Fireworks AI
+description:
+  en_US: Fireworks AI provider plugin — serverless LLM, embedding, and rerank models
+icon: icon.png
+license: MIT
+
+# Dependencies
+dependencies:
+  python:
+    loco-sdk: ">=0.2.6"
+    pydantic: ">=2.0.0"
+    openai: ">=1.0.0"
+    httpx: ">=0.27.0"
+
+# Permissions
+permissions:
+  - workflow:execute
+
+# Authentication Provider Definitions
+auth:
+  - auth/fireworks.yaml
+
+ai:
+  - ai/fireworks.yaml
+
+# Version Requirements
+loco_version: ">=0.1.0"
+python_version: ">=3.10"
