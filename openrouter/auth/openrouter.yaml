@@ -1,0 +1,40 @@
+identity:
+  name: openrouter
+  label:
+    en_US: OpenRouter
+    vi_VN: OpenRouter
+
+auth_type: api_key
+
+credentials_schema:
+  - name: api_key
+    type: secret
+    required: true
+    label:
+      en_US: API Key
+      vi_VN: Khóa API
+    description:
+      en_US: Your OpenRouter API key
+      vi_VN: Khóa API OpenRouter của bạn
+    placeholder:
+      en_US: Enter your API key
+
+  - name: http_referer
+    type: string
+    required: false
+    label:
+      en_US: HTTP Referer (optional)
+      vi_VN: HTTP Referer (tùy chọn)
+    description:
+      en_US: Sent as the HTTP-Referer header — used by OpenRouter for app rankings on openrouter.ai
+      vi_VN: Gửi qua header HTTP-Referer — OpenRouter dùng để xếp hạng ứng dụng trên openrouter.ai
+
+  - name: app_name
+    type: string
+    required: false
+    label:
+      en_US: App Name (optional)
+      vi_VN: Tên ứng dụng (tùy chọn)
+    description:
+      en_US: Sent as the X-Title header — identifies your app on openrouter.ai
+      vi_VN: Gửi qua header X-Title — dùng để nhận diện ứng dụng của bạn trên openrouter.ai

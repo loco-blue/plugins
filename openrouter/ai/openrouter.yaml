@@ -1,0 +1,314 @@
+name: openrouter
+label:
+  en_US: OpenRouter
+  vi_VN: OpenRouter
+description:
+  en_US: OpenRouter Provider — unified LLM, embedding, and rerank models from 300+ providers
+  vi_VN: OpenRouter Provider — mô hình LLM, embedding và rerank hợp nhất từ hơn 300 nhà cung cấp
+icon: icon.svg
+
+source: ai/provider.py
+provider: openrouter
+
+models:
+  # ── LLMs ──────────────────────────────────────────────
+  - model: anthropic/claude-5-sonnet
+    label:
+      en_US: Claude 5 Sonnet
+    type: llm
+    features:
+      - streaming
+      - tool_call
+      - multi_tool_call
+      - vision
+      - structured_output
+      - thinking
+      - document
+    properties:
+      context_window: 500000
+      max_output_tokens: 32768
+    pricing:
+      input_per_1m: 3.00
+      output_per_1m: 15.00
+
+  - model: anthropic/claude-5-opus
+    label:
+      en_US: Claude 5 Opus
+    type: llm
+    features:
+      - streaming
+      - tool_call
+      - multi_tool_call
+      - vision
+      - structured_output
+      - thinking
+      - document
+    properties:
+      context_window: 500000
+      max_output_tokens: 32768
+    pricing:
+      input_per_1m: 15.00
+      output_per_1m: 75.00
+
+  - model: openai/gpt-5.4
+    label:
+      en_US: GPT-5.4
+    type: llm
+    features:
+      - streaming
+      - tool_call
+      - multi_tool_call
+      - vision
+      - structured_output
+      - thinking
+    properties:
+      context_window: 400000
+      max_output_tokens: 32768
+    pricing:
+      input_per_1m: 2.50
+      output_per_1m: 10.00
+
+  - model: openai/gpt-5.4-mini
+    label:
+      en_US: GPT-5.4 Mini
+    type: llm
+    features:
+      - streaming
+      - tool_call
+      - multi_tool_call
+      - structured_output
+    properties:
+      context_window: 400000
+      max_output_tokens: 32768
+    pricing:
+      input_per_1m: 0.25
+      output_per_1m: 1.00
+
+  - model: google/gemini-3.7-pro
+    label:
+      en_US: Gemini 3.7 Pro
+    type: llm
+    features:
+      - streaming
+      - tool_call
+      - multi_tool_call
+      - vision
+      - structured_output
+      - thinking
+      - document
+    properties:
+      context_window: 1048576
+      max_output_tokens: 65536
+    pricing:
+      input_per_1m: 1.25
+      output_per_1m: 5.00
+
+  - model: google/gemini-3.7-flash
+    label:
+      en_US: Gemini 3.7 Flash
+    type: llm
+    features:
+      - streaming
+      - tool_call
+      - multi_tool_call
+      - vision
+      - structured_output
+    properties:
+      context_window: 1048576
+      max_output_tokens: 65536
+    pricing:
+      input_per_1m: 0.75
+      output_per_1m: 3.75
+
+  - model: deepseek/deepseek-v4-pro
+    label:
+      en_US: DeepSeek V4 Pro
+    type: llm
+    features:
+      - streaming
+      - tool_call
+      - multi_tool_call
+      - structured_output
+      - thinking
+    properties:
+      context_window: 1048576
+      max_output_tokens: 32768
+    pricing:
+      input_per_1m: 1.74
+      output_per_1m: 3.48
+
+  - model: meta-llama/llama-4.2-70b-instruct
+    label:
+      en_US: Llama 4.2 70B Instruct
+    type: llm
+    features:
+      - streaming
+      - tool_call
+      - structured_output
+    properties:
+      context_window: 131072
+      max_output_tokens: 8192
+    pricing:
+      input_per_1m: 0.35
+      output_per_1m: 0.40
+
+  - model: x-ai/grok-4.3
+    label:
+      en_US: Grok 4.3
+    type: llm
+    features:
+      - streaming
+      - tool_call
+      - multi_tool_call
+      - vision
+      - structured_output
+      - thinking
+    properties:
+      context_window: 262144
+      max_output_tokens: 32768
+    pricing:
+      input_per_1m: 3.00
+      output_per_1m: 15.00
+
+  - model: qwen/qwen3.7-max
+    label:
+      en_US: Qwen 3.7 Max
+    type: llm
+    features:
+      - streaming
+      - tool_call
+      - multi_tool_call
+      - vision
+      - structured_output
+      - document
+    properties:
+      context_window: 262144
+      max_output_tokens: 16384
+    pricing:
+      input_per_1m: 1.25
+      output_per_1m: 3.75
+
+  - model: moonshotai/kimi-k3
+    label:
+      en_US: Kimi K3
+    type: llm
+    features:
+      - streaming
+      - tool_call
+      - multi_tool_call
+      - vision
+      - structured_output
+      - thinking
+      - document
+    properties:
+      context_window: 1048576
+      max_output_tokens: 32768
+    pricing:
+      input_per_1m: 3.00
+      output_per_1m: 15.00
+
+  - model: openrouter/free
+    label:
+      en_US: Free Tier (Auto)
+      vi_VN: Miễn phí (Tự động)
+    description:
+      en_US: Automatically routes each request to an available free model on OpenRouter
+      vi_VN: Tự động định tuyến mỗi yêu cầu tới một mô hình miễn phí đang khả dụng trên OpenRouter
+    type: llm
+    features:
+      - streaming
+      - tool_call
+      - structured_output
+      - vision
+    properties:
+      context_window: 200000
+      max_output_tokens: 8192
+    pricing:
+      input_per_1m: 0.00
+      output_per_1m: 0.00
+
+  # ── Embeddings ────────────────────────────────────────
+  - model: openai/text-embedding-3-large
+    label:
+      en_US: OpenAI Text Embedding 3 Large
+    type: embedding
+    features: []
+    properties:
+      context_window: 8191
+      max_output_tokens: 8191
+    pricing:
+      input_per_1m: 0.13
+      output_per_1m: 0.00
+
+  - model: openai/text-embedding-3-small
+    label:
+      en_US: OpenAI Text Embedding 3 Small
+    type: embedding
+    features: []
+    properties:
+      context_window: 8191
+      max_output_tokens: 8191
+    pricing:
+      input_per_1m: 0.02
+      output_per_1m: 0.00
+
+  - model: qwen/qwen3-embedding-8b
+    label:
+      en_US: Qwen3 Embedding 8B
+    type: embedding
+    features: []
+    properties:
+      context_window: 40960
+      max_output_tokens: 40960
+    pricing:
+      input_per_1m: 0.10
+      output_per_1m: 0.00
+
+  - model: cohere/embed-v4
+    label:
+      en_US: Cohere Embed v4
+    type: embedding
+    features: []
+    properties:
+      context_window: 128000
+      max_output_tokens: 128000
+    pricing:
+      input_per_1m: 0.12
+      output_per_1m: 0.00
+
+  # ── Reranking ─────────────────────────────────────────
+  - model: cohere/rerank-4-pro
+    label:
+      en_US: Cohere Rerank 4 Pro
+    type: rerank
+    features: []
+    properties:
+      context_window: 4096
+      max_output_tokens: 4096
+    pricing:
+      input_per_1m: 2.00
+      output_per_1m: 0.00
+
+  - model: cohere/rerank-4-fast
+    label:
+      en_US: Cohere Rerank 4 Fast
+    type: rerank
+    features: []
+    properties:
+      context_window: 4096
+      max_output_tokens: 4096
+    pricing:
+      input_per_1m: 1.00
+      output_per_1m: 0.00
+
+  - model: qwen/qwen3-reranker-8b
+    label:
+      en_US: Qwen3 Reranker 8B
+    type: rerank
+    features: []
+    properties:
+      context_window: 40960
+      max_output_tokens: 40960
+    pricing:
+      input_per_1m: 0.20
+      output_per_1m: 0.00
