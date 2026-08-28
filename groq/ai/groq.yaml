@@ -9,88 +9,28 @@ icon: icon.svg
 
 source: ai/provider.py
 provider: groq
-
 models:
-  - model: compound-beta
-    label:
-      en_US: Groq Compound
-    type: llm
-    features:
-      - structured_output
-    properties:
-      context_window: 131072
-      max_output_tokens: 8192
-    pricing:
-      input_per_1m: 1.0
-      output_per_1m: 3.0
-
-  - model: compound-beta-mini
-    label:
-      en_US: Groq Compound Mini
-    type: llm
-    features:
-      - structured_output
-    properties:
-      context_window: 131072
-      max_output_tokens: 8192
-    pricing:
-      input_per_1m: 0.50
-      output_per_1m: 1.50
-
+# TODO: review pricing/limits -- Contact Sales models have none scraped (added by update_models.py)
   - model: llama-3.1-8b-instant
     label:
-      en_US: Llama 3.1 8B Instant
+      en_US: Llama 3.1 8B
     type: llm
     features:
       - tool_call
     properties:
       context_window: 131072
       max_output_tokens: 131072
-    pricing:
-      input_per_1m: 0.05
-      output_per_1m: 0.08
-
+# TODO: review pricing/limits -- Contact Sales models have none scraped (added by update_models.py)
   - model: llama-3.3-70b-versatile
     label:
-      en_US: Llama 3.3 70B Versatile
+      en_US: Llama 3.3 70B
     type: llm
     features:
       - tool_call
-      - structured_output
     properties:
       context_window: 131072
       max_output_tokens: 32768
-    pricing:
-      input_per_1m: 0.59
-      output_per_1m: 0.79
-
-  - model: meta-llama/llama-4-scout-17b-16e-instruct
-    label:
-      en_US: Llama 4 Scout 17B Instruct
-    type: llm
-    features:
-      - tool_call
-    properties:
-      context_window: 131072
-      max_output_tokens: 8192
-    pricing:
-      input_per_1m: 0.11
-      output_per_1m: 0.34
-
-  - model: openai/gpt-oss-20b
-    label:
-      en_US: GPT OSS 20B
-    type: llm
-    features:
-      - tool_call
-      - structured_output
-    properties:
-      context_window: 131072
-      max_output_tokens: 65536
-    pricing:
-      input_per_1m: 0.075
-      output_per_1m: 0.30
-
+# TODO: review pricing/limits -- Contact Sales models have none scraped (added by update_models.py)
   - model: openai/gpt-oss-120b
     label:
       en_US: GPT OSS 120B
@@ -98,60 +38,98 @@ models:
     features:
       - tool_call
       - structured_output
+      - thinking
     properties:
       context_window: 131072
       max_output_tokens: 65536
     pricing:
       input_per_1m: 0.15
-      output_per_1m: 0.60
-
-  - model: qwen/qwen3-32b
+      output_per_1m: 0.6
+# TODO: review pricing/limits -- Contact Sales models have none scraped (added by update_models.py)
+  - model: openai/gpt-oss-20b
     label:
-      en_US: Qwen 3 32B
+      en_US: GPT OSS 20B
     type: llm
     features:
       - tool_call
       - structured_output
+      - thinking
     properties:
       context_window: 131072
-      max_output_tokens: 40960
+      max_output_tokens: 65536
     pricing:
-      input_per_1m: 0.29
-      output_per_1m: 0.59
-
-  - model: moonshotai/kimi-k2-instruct
+      input_per_1m: 0.075
+      output_per_1m: 0.3
+# TODO: review pricing/limits -- Contact Sales models have none scraped (added by update_models.py)
+  - model: groq/compound
     label:
-      en_US: Kimi K2 Instruct
+      en_US: Compound
+    type: llm
+    properties:
+      context_window: 131072
+      max_output_tokens: 8192
+# TODO: review pricing/limits -- Contact Sales models have none scraped (added by update_models.py)
+  - model: groq/compound-mini
+    label:
+      en_US: Compound Mini
+    type: llm
+    properties:
+      context_window: 131072
+      max_output_tokens: 8192
+# TODO: review pricing/limits -- Contact Sales models have none scraped (added by update_models.py)
+  - model: minimaxai/minimax-m2.7
+    label:
+      en_US: MiniMax M2.7
     type: llm
     features:
       - tool_call
+      - thinking
+    properties:
+      context_window: 196608
+      max_output_tokens: 131072
+# TODO: review pricing/limits -- Contact Sales models have none scraped (added by update_models.py)
+  - model: openai/gpt-oss-safeguard-20b
+    label:
+      en_US: Safety GPT OSS 20B
+    type: llm
+    features:
+      - tool_call
+      - structured_output
+      - thinking
+    properties:
+      context_window: 131072
+      max_output_tokens: 65536
+    pricing:
+      input_per_1m: 0.075
+      output_per_1m: 0.3
+# TODO: review pricing/limits -- Contact Sales models have none scraped (added by update_models.py)
+  - model: qwen/qwen3.6-27b
+    label:
+      en_US: Qwen/Qwen3.6-27B
+    type: llm
+    features:
+      - tool_call
+      - thinking
+      - vision
     properties:
       context_window: 131072
       max_output_tokens: 16384
     pricing:
-      input_per_1m: 1.00
-      output_per_1m: 3.00
-
-  - model: moonshotai/kimi-k2-instruct-0905
+      input_per_1m: 0.6
+      output_per_1m: 3.0
+# TODO: review pricing/limits -- Contact Sales models have none scraped (added by update_models.py)
+  - model: qwen/qwen3.8-27b
     label:
-      en_US: Kimi K2 Instruct (0905)
+      en_US: Qwen/Qwen3.8-27B
     type: llm
     features:
       - tool_call
+      - structured_output
+      - thinking
+      - vision
     properties:
-      context_window: 262144
+      context_window: 131042
       max_output_tokens: 16384
     pricing:
-      input_per_1m: 1.00
-      output_per_1m: 3.00
-
-  - model: allam-2-7b
-    label:
-      en_US: Allam 2 7B
-    type: llm
-    properties:
-      context_window: 4096
-      max_output_tokens: 4096
-    pricing:
-      input_per_1m: 0.05
-      output_per_1m: 0.08
+      input_per_1m: 0.8
+      output_per_1m: 4.0

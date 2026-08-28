@@ -5,7 +5,7 @@ A node plugin for Loco
 ## Overview
 
 **Type:** node  
-**Version:** 0.1.0  
+**Version:** 0.1.1  
 **Author:** loco
 
 ## Installation

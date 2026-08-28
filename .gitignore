@@ -45,4 +45,4 @@ htmlcov/
 
 # Loco
 *.lpk
-.loco-metadata.json
+.loco-metadata.json.superpowers/
