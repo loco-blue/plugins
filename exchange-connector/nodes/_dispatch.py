@@ -22,7 +22,8 @@ _ADAPTERS: dict[str, type[ExchangeAdapter]] = {
 }
 
 
-def _adapter_cls(context: dict[str, Any]) -> tuple[type[ExchangeAdapter], dict[str, Any]]:
+def _resolve_exchange(context: dict[str, Any]) -> tuple[type[ExchangeAdapter], dict[str, Any]]:
+    """Return the (adapter class, auth dict) pair for this node's credential."""
     auth = context.get("auth")
     if not auth:
         raise ValueError("exchange credentials required: context['auth'] is empty")
@@ -37,7 +38,7 @@ def _adapter_cls(context: dict[str, Any]) -> tuple[type[ExchangeAdapter], dict[s
 
 
 async def run_get_klines(inputs: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
-    adapter_cls, auth = _adapter_cls(context)
+    adapter_cls, auth = _resolve_exchange(context)
     testnet = inputs.get("testnet", True)
     async with httpx.AsyncClient() as client:
         adapter = adapter_cls(client, auth, testnet=testnet)
@@ -46,7 +47,7 @@ async def run_get_klines(inputs: dict[str, Any], context: dict[str, Any]) -> dic
 
 
 async def run_place_order(inputs: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
-    adapter_cls, auth = _adapter_cls(context)
+    adapter_cls, auth = _resolve_exchange(context)
     testnet = inputs.get("testnet", True)
     async with httpx.AsyncClient() as client:
         adapter = adapter_cls(client, auth, testnet=testnet)
@@ -59,7 +60,7 @@ async def run_place_order(inputs: dict[str, Any], context: dict[str, Any]) -> di
 
 
 async def run_get_positions(inputs: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
-    adapter_cls, auth = _adapter_cls(context)
+    adapter_cls, auth = _resolve_exchange(context)
     testnet = inputs.get("testnet", True)
     async with httpx.AsyncClient() as client:
         adapter = adapter_cls(client, auth, testnet=testnet)
@@ -68,7 +69,7 @@ async def run_get_positions(inputs: dict[str, Any], context: dict[str, Any]) -> 
 
 
 async def run_cancel_order(inputs: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
-    adapter_cls, auth = _adapter_cls(context)
+    adapter_cls, auth = _resolve_exchange(context)
     testnet = inputs.get("testnet", True)
     async with httpx.AsyncClient() as client:
         adapter = adapter_cls(client, auth, testnet=testnet)

@@ -6,7 +6,6 @@ different host - both demo and live use `https://www.okx.com`.
 """
 
 import json
-import time
 from datetime import datetime, timezone
 from typing import Any
 
@@ -50,6 +49,21 @@ class OkxAdapter(ExchangeAdapter):
             headers["x-simulated-trading"] = "1"
         return headers
 
+    @staticmethod
+    def _unwrap(raw: dict[str, Any]) -> list[Any]:
+        """Return `raw["data"]`, raising on OKX's HTTP-200 error envelope.
+
+        OKX signals failures with HTTP 200 plus a non-"0" top-level `code`
+        (e.g. `{"code": "50113", "msg": "Invalid Sign", "data": []}`), which
+        `raise_for_status()` cannot see - without this check the caller would
+        crash on an empty `data` list instead of reporting the real error.
+        """
+        if raw.get("code") != "0":
+            raise ValueError(
+                f"OKX error {raw.get('code')}: {raw.get('msg')}"
+            )
+        return raw["data"]
+
     async def get_klines(
         self, symbol: str, interval: str
     ) -> list[dict[str, Any]]:
@@ -59,7 +73,8 @@ class OkxAdapter(ExchangeAdapter):
             headers=self._headers("GET", request_path),
         )
         response.raise_for_status()
-        raw = response.json()
+        # OKX returns candles newest-first; the shared contract (base.py) is
+        # oldest-first, like Binance's already-ascending /api/v3/klines.
         return [
             {
                 "open_time": row[0],
@@ -69,7 +84,7 @@ class OkxAdapter(ExchangeAdapter):
                 "close": float(row[4]),
                 "volume": float(row[5]),
             }
-            for row in raw["data"]
+            for row in reversed(self._unwrap(response.json()))
         ]
 
     async def place_order(
@@ -88,18 +103,29 @@ class OkxAdapter(ExchangeAdapter):
         response = await self.client.post(
             f"{_BASE_URL}{request_path}",
             headers=self._headers("POST", request_path, body),
-            json=body_dict,
+            # Send the exact bytes we signed: `json=body_dict` would let httpx
+            # re-serialize with different separators, breaking OK-ACCESS-SIGN.
+            content=body.encode("utf-8"),
         )
         response.raise_for_status()
-        raw = response.json()["data"][0]
+        raw = self._unwrap(response.json())[0]
+        if raw.get("sCode") != "0":
+            raise ValueError(f"OKX order rejected: {raw.get('sMsg')}")
+        # OKX's place-order response is an acknowledgement only - it carries
+        # {ordId, clOrdId, tag, ts, sCode, sMsg} and no fill data (unlike
+        # Binance, whose order response reports status/executedQty). A caller
+        # that needs real fill status must call get_positions afterwards.
         return {
             "order_id": raw["ordId"],
             "client_order_id": raw.get("clOrdId", client_order_id),
-            "status": raw["state"],
-            "filled_qty": float(raw.get("fillSz", 0)),
-            "avg_price": float(raw.get("avgPx", 0)),
+            "status": "live",
+            "filled_qty": 0.0,
+            "avg_price": 0.0,
         }
 
+    # NOTE: place_order uses tdMode "cash" (spot), but this endpoint is
+    # /api/v5/account/positions, which only reports derivatives positions -
+    # a spot order placed through this plugin will never appear here.
     async def get_positions(self, symbol: str) -> list[dict[str, Any]]:
         request_path = f"/api/v5/account/positions?instId={symbol}"
         response = await self.client.get(
@@ -107,9 +133,8 @@ class OkxAdapter(ExchangeAdapter):
             headers=self._headers("GET", request_path),
         )
         response.raise_for_status()
-        raw = response.json()
         positions = []
-        for row in raw["data"]:
+        for row in self._unwrap(response.json()):
             size = float(row.get("pos", 0))
             if size == 0:
                 continue
@@ -130,9 +155,10 @@ class OkxAdapter(ExchangeAdapter):
         response = await self.client.post(
             f"{_BASE_URL}{request_path}",
             headers=self._headers("POST", request_path, body),
-            json=body_dict,
+            # Send the exact bytes we signed - see place_order.
+            content=body.encode("utf-8"),
         )
         response.raise_for_status()
-        raw = response.json()["data"][0]
+        raw = self._unwrap(response.json())[0]
         status = "canceled" if raw.get("sCode") == "0" else "failed"
         return {"order_id": raw["ordId"], "status": status}

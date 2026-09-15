@@ -36,6 +36,27 @@ The two adapters implement the shared `ExchangeAdapter` contract
 Both normalize their exchange's raw responses into the same shape, so
 `_dispatch.py` never branches on exchange after construction.
 
+## Known simplifications
+
+This is a proof-of-concept connector; the following are deliberate
+shortcuts, not bugs:
+
+- **`place_order` fill data is asymmetric between the two exchanges.**
+  Binance's `POST /api/v3/order` response carries real execution data, so
+  `BinanceAdapter` returns the exchange's own `status` plus a true
+  `filled_qty`/`avg_price`. OKX's `POST /api/v5/trade/order` is an
+  acknowledgement only (`{ordId, clOrdId, tag, ts, sCode, sMsg}`) and
+  carries no fill information, so `OkxAdapter` returns `status: "live"`
+  (OKX's term for accepted-but-not-yet-filled) with `filled_qty: 0.0` and
+  `avg_price: 0.0`. A caller that needs real fill status on OKX must call
+  `get_positions` afterwards.
+- **`get_positions` is not a true positions query on either exchange.**
+  On Binance it queries `/api/v3/openOrders` (resting spot orders), not a
+  positions endpoint. On OKX it queries `/api/v5/account/positions`, which
+  reports derivatives positions only — while `place_order` submits with
+  `tdMode: "cash"` (spot), so a spot order placed through this plugin will
+  never show up in `get_positions` on the same OKX account.
+
 ## Configuration
 
 Two auth providers are declared, one per exchange:
@@ -72,7 +93,7 @@ credentials_schema:
 ### Testing
 
 ```bash
-cd exchange-connector
+cd plugins/exchange-connector
 pytest tests/ -v
 ```
 
