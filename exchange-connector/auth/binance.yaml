@@ -1,6 +1,7 @@
 identity:
   name: binance
   label: {en_US: Binance}
+  icon: binance.svg
 
 auth_type: api_key
 

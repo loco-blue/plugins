@@ -1,6 +1,7 @@
 identity:
   name: okx
   label: {en_US: OKX}
+  icon: okx.svg
 
 auth_type: api_key
 
