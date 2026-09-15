@@ -22,7 +22,7 @@ _ADAPTERS: dict[str, type[ExchangeAdapter]] = {
 }
 
 
-def _adapter_cls(context: dict[str, Any]) -> type[ExchangeAdapter]:
+def _adapter_cls(context: dict[str, Any]) -> tuple[type[ExchangeAdapter], dict[str, Any]]:
     auth = context.get("auth")
     if not auth:
         raise ValueError("exchange credentials required: context['auth'] is empty")
