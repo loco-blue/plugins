@@ -1,0 +1,38 @@
+name: place_order
+label: {en_US: "Place Order"}
+category: exchange
+description: {en_US: "Place a market order on the connected exchange account"}
+icon: send
+source: nodes/place_order.py
+
+inputs:
+  - name: symbol
+    type: string
+    required: true
+  - name: side
+    type: select
+    required: true
+    options: [buy, sell]
+  - name: quantity
+    type: number
+    required: true
+  - name: client_order_id
+    type: string
+    required: true
+    description: {en_US: "Idempotency key - must be unique per intended order"}
+  - name: testnet
+    type: boolean
+    required: false
+    default: true
+
+outputs:
+  - name: order_id
+    type: string
+  - name: client_order_id
+    type: string
+  - name: status
+    type: string
+  - name: filled_qty
+    type: number
+  - name: avg_price
+    type: number

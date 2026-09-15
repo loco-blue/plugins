@@ -1,0 +1,24 @@
+name: cancel_order
+label: {en_US: "Cancel Order"}
+category: exchange
+description: {en_US: "Cancel a resting order on the connected exchange account"}
+icon: x-circle
+source: nodes/cancel_order.py
+
+inputs:
+  - name: symbol
+    type: string
+    required: true
+  - name: order_id
+    type: string
+    required: true
+  - name: testnet
+    type: boolean
+    required: false
+    default: true
+
+outputs:
+  - name: order_id
+    type: string
+  - name: status
+    type: string

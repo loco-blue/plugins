@@ -1,0 +1,28 @@
+name: get_klines
+label: {en_US: "Get Klines"}
+category: exchange
+description: {en_US: "Fetch recent OHLCV candlestick data from the connected exchange account"}
+icon: bar-chart
+source: nodes/get_klines.py
+
+inputs:
+  - name: symbol
+    type: string
+    required: true
+    label: {en_US: Symbol}
+    description: {en_US: "Use the connected exchange's own symbol format, e.g. BTCUSDT (Binance) or BTC-USDT (OKX)"}
+  - name: interval
+    type: string
+    required: false
+    default: "1m"
+    label: {en_US: Interval}
+  - name: testnet
+    type: boolean
+    required: false
+    default: true
+    label: {en_US: Use Testnet}
+
+outputs:
+  - name: klines
+    type: array
+    description: {en_US: "[{open_time, open, high, low, close, volume}]"}

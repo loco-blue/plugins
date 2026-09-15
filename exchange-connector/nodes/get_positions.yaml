@@ -1,0 +1,20 @@
+name: get_positions
+label: {en_US: "Get Positions"}
+category: exchange
+description: {en_US: "Fetch open positions for a symbol on the connected exchange account"}
+icon: list
+source: nodes/get_positions.py
+
+inputs:
+  - name: symbol
+    type: string
+    required: true
+  - name: testnet
+    type: boolean
+    required: false
+    default: true
+
+outputs:
+  - name: positions
+    type: array
+    description: {en_US: "[{symbol, side, entry_price, quantity}]"}

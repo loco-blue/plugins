@@ -1,0 +1,19 @@
+identity:
+  name: okx
+  label: {en_US: OKX}
+
+auth_type: api_key
+
+credentials_schema:
+  - name: api_key
+    type: secret
+    required: true
+    label: {en_US: "API Key"}
+  - name: api_secret
+    type: secret
+    required: true
+    label: {en_US: "API Secret"}
+  - name: api_passphrase
+    type: secret
+    required: true
+    label: {en_US: "API Passphrase"}
