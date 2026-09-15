@@ -1,8 +1,10 @@
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
+from urllib.parse import urlencode
 
 import pytest
 
 from adapters.binance import BinanceAdapter
+from adapters.signing import hmac_sha256_hex
 
 CREDENTIALS = {"auth_type": "api_key", "api_key": "ak", "api_secret": "as"}
 
@@ -78,7 +80,15 @@ async def test_place_order_signs_the_request_and_normalizes_response(client):
     assert params["newClientOrderId"] == "wf-1-BTCUSDT-5"
     assert params["side"] == "BUY"
     assert params["type"] == "MARKET"
-    assert "signature" in params and "timestamp" in params
+    assert "timestamp" in params
+
+    # Recompute the signature over the exact query string that was signed.
+    signed_query = urlencode(
+        {k: v for k, v in params.items() if k != "signature"}
+    )
+    assert params["signature"] == hmac_sha256_hex(
+        CREDENTIALS["api_secret"], signed_query
+    )
 
 
 async def test_get_positions_normalizes_open_position(client):

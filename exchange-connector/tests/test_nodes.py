@@ -2,7 +2,9 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from nodes.cancel_order import CancelOrderNode
 from nodes.get_klines import GetKlinesNode
+from nodes.get_positions import GetPositionsNode
 from nodes.place_order import PlaceOrderNode
 
 AUTH_BINANCE = {
@@ -66,6 +68,52 @@ async def test_place_order_dispatches_to_okx_when_the_credential_is_okx():
         )
     assert result["client_order_id"] == "wf-1-BTC-USDT-5"
     mocked.assert_awaited_once_with("BTC-USDT", "buy", 0.01, "wf-1-BTC-USDT-5")
+
+
+async def test_get_positions_dispatches_to_binance_when_the_credential_is_binance():
+    with patch(
+        "nodes._dispatch.BinanceAdapter.get_positions",
+        new=AsyncMock(
+            return_value=[
+                {
+                    "symbol": "BTCUSDT",
+                    "side": "long",
+                    "entry_price": 42000.0,
+                    "quantity": 0.01,
+                }
+            ]
+        ),
+    ) as mocked:
+        node = GetPositionsNode()
+        result = await node.execute(
+            {"symbol": "BTCUSDT", "testnet": True},
+            {"auth": AUTH_BINANCE},
+        )
+    assert result == {
+        "positions": [
+            {
+                "symbol": "BTCUSDT",
+                "side": "long",
+                "entry_price": 42000.0,
+                "quantity": 0.01,
+            }
+        ]
+    }
+    mocked.assert_awaited_once_with("BTCUSDT")
+
+
+async def test_cancel_order_dispatches_to_okx_when_the_credential_is_okx():
+    with patch(
+        "nodes._dispatch.OkxAdapter.cancel_order",
+        new=AsyncMock(return_value={"order_id": "ord-1", "status": "canceled"}),
+    ) as mocked:
+        node = CancelOrderNode()
+        result = await node.execute(
+            {"symbol": "BTC-USDT", "order_id": "ord-1", "testnet": True},
+            {"auth": AUTH_OKX},
+        )
+    assert result == {"order_id": "ord-1", "status": "canceled"}
+    mocked.assert_awaited_once_with("BTC-USDT", "ord-1")
 
 
 async def test_missing_auth_raises_before_any_network_call():
