@@ -1,7 +1,7 @@
 name: place_order
 label: {en_US: "Place Order"}
 category: exchange
-description: {en_US: "Place a market order on the connected exchange account"}
+description: {en_US: "Place an order on the connected exchange account"}
 icon: send
 source: nodes/place_order.py
 
@@ -9,6 +9,12 @@ inputs:
   - name: symbol
     type: string
     required: true
+  - name: market_type
+    type: select
+    required: false
+    default: spot
+    options: [spot, futures]
+    label: {en_US: Market Type}
   - name: side
     type: select
     required: true
@@ -16,10 +22,30 @@ inputs:
   - name: quantity
     type: number
     required: true
+    description: {en_US: "Base-currency amount (e.g. BTC), except on OKX futures/swaps where this is passed through as OKX's native contract count (sz), not a base-currency amount"}
   - name: client_order_id
     type: string
     required: true
     description: {en_US: "Idempotency key - must be unique per intended order"}
+  - name: order_type
+    type: select
+    required: false
+    default: market
+    options: [market, stop_market, take_profit_market]
+    description: {en_US: "stop_market/take_profit_market require market_type=futures and stop_price"}
+  - name: stop_price
+    type: number
+    required: false
+    description: {en_US: "Required when order_type is not 'market'"}
+  - name: reduce_only
+    type: boolean
+    required: false
+    default: false
+    description: {en_US: "Only valid when market_type=futures"}
+  - name: leverage
+    type: integer
+    required: false
+    description: {en_US: "Only valid when market_type=futures. Sets leverage on the symbol before placing the order."}
   - name: testnet
     type: boolean
     required: false

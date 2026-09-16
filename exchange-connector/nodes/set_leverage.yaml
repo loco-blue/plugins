@@ -1,0 +1,26 @@
+name: set_leverage
+label: {en_US: "Set Leverage"}
+category: exchange
+description: {en_US: "Set leverage for a symbol on the connected exchange account (futures only)"}
+icon: gauge
+source: nodes/set_leverage.py
+
+inputs:
+  - name: symbol
+    type: string
+    required: true
+  - name: leverage
+    type: integer
+    required: true
+  - name: testnet
+    type: boolean
+    required: false
+    default: true
+
+outputs:
+  - name: symbol
+    type: string
+  - name: leverage
+    type: integer
+  - name: status
+    type: string

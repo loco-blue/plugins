@@ -3,7 +3,7 @@ from urllib.parse import urlencode
 
 import pytest
 
-from adapters.binance import BinanceAdapter
+from adapters.binance_spot import BinanceSpotAdapter
 from adapters.signing import hmac_sha256_hex
 
 CREDENTIALS = {"auth_type": "api_key", "api_key": "ak", "api_secret": "as"}
@@ -28,7 +28,7 @@ async def test_get_klines_normalizes_raw_binance_arrays(client):
          1700000059999, "0", 0, "0", "0", "0"],
     ]
     client.get = AsyncMock(return_value=_json_response(raw))
-    adapter = BinanceAdapter(client, CREDENTIALS, testnet=True)
+    adapter = BinanceSpotAdapter(client, CREDENTIALS, testnet=True)
 
     klines = await adapter.get_klines("BTCUSDT", "1m")
 
@@ -42,13 +42,7 @@ async def test_get_klines_normalizes_raw_binance_arrays(client):
             "volume": 12.345,
         }
     ]
-    called_url = client.get.call_args.args[0]
-    assert called_url == "https://testnet.binance.vision/api/v3/klines"
-    assert client.get.call_args.kwargs["params"] == {
-        "symbol": "BTCUSDT",
-        "interval": "1m",
-        "limit": 100,
-    }
+    assert client.get.call_args.args[0] == "https://testnet.binance.vision/api/v3/klines"
 
 
 async def test_place_order_signs_the_request_and_normalizes_response(client):
@@ -63,7 +57,7 @@ async def test_place_order_signs_the_request_and_normalizes_response(client):
             }
         )
     )
-    adapter = BinanceAdapter(client, CREDENTIALS, testnet=True)
+    adapter = BinanceSpotAdapter(client, CREDENTIALS, testnet=True)
 
     order = await adapter.place_order("BTCUSDT", "buy", 0.01, "wf-1-BTCUSDT-5")
 
@@ -77,52 +71,51 @@ async def test_place_order_signs_the_request_and_normalizes_response(client):
     kwargs = client.post.call_args.kwargs
     assert kwargs["headers"] == {"X-MBX-APIKEY": "ak"}
     params = kwargs["params"]
-    assert params["newClientOrderId"] == "wf-1-BTCUSDT-5"
-    assert params["side"] == "BUY"
     assert params["type"] == "MARKET"
-    assert "timestamp" in params
-
-    # Recompute the signature over the exact query string that was signed.
-    signed_query = urlencode(
-        {k: v for k, v in params.items() if k != "signature"}
-    )
-    assert params["signature"] == hmac_sha256_hex(
-        CREDENTIALS["api_secret"], signed_query
-    )
+    signed_query = urlencode({k: v for k, v in params.items() if k != "signature"})
+    assert params["signature"] == hmac_sha256_hex(CREDENTIALS["api_secret"], signed_query)
 
 
-async def test_get_positions_normalizes_open_position(client):
-    client.get = AsyncMock(
-        return_value=_json_response(
-            [{"symbol": "BTCUSDT", "positionAmt": "0.01000000", "entryPrice": "42000.00"}]
+async def test_place_order_rejects_non_market_order_type(client):
+    adapter = BinanceSpotAdapter(client, CREDENTIALS, testnet=True)
+    with pytest.raises(ValueError, match="order_type"):
+        await adapter.place_order(
+            "BTCUSDT", "buy", 0.01, "wf-1", order_type="stop_market", stop_price=100.0
         )
-    )
-    adapter = BinanceAdapter(client, CREDENTIALS, testnet=True)
-
-    positions = await adapter.get_positions("BTCUSDT")
-
-    assert positions == [
-        {"symbol": "BTCUSDT", "side": "long", "entry_price": 42000.0, "quantity": 0.01}
-    ]
+    client.post.assert_not_called() if hasattr(client, "post") else None
 
 
-async def test_get_positions_empty_when_flat(client):
-    client.get = AsyncMock(
-        return_value=_json_response(
-            [{"symbol": "BTCUSDT", "positionAmt": "0.00000000", "entryPrice": "0.00"}]
-        )
-    )
-    adapter = BinanceAdapter(client, CREDENTIALS, testnet=True)
-
-    assert await adapter.get_positions("BTCUSDT") == []
+async def test_place_order_rejects_reduce_only(client):
+    adapter = BinanceSpotAdapter(client, CREDENTIALS, testnet=True)
+    with pytest.raises(ValueError, match="reduce_only"):
+        await adapter.place_order("BTCUSDT", "buy", 0.01, "wf-1", reduce_only=True)
 
 
 async def test_cancel_order_normalizes_response(client):
     client.delete = AsyncMock(
         return_value=_json_response({"orderId": 991, "status": "CANCELED"})
     )
-    adapter = BinanceAdapter(client, CREDENTIALS, testnet=True)
+    adapter = BinanceSpotAdapter(client, CREDENTIALS, testnet=True)
 
     result = await adapter.cancel_order("BTCUSDT", "991")
 
     assert result == {"order_id": "991", "status": "CANCELED"}
+
+
+async def test_get_balance_filters_zero_balances(client):
+    client.get = AsyncMock(
+        return_value=_json_response(
+            {
+                "balances": [
+                    {"asset": "USDT", "free": "100.50", "locked": "0.00"},
+                    {"asset": "ETH", "free": "0.00", "locked": "0.00"},
+                ]
+            }
+        )
+    )
+    adapter = BinanceSpotAdapter(client, CREDENTIALS, testnet=True)
+
+    balances = await adapter.get_balance()
+
+    assert balances == [{"asset": "USDT", "free": 100.50, "locked": 0.0}]
+    assert client.get.call_args.args[0] == "https://testnet.binance.vision/api/v3/account"

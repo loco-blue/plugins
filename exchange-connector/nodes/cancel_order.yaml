@@ -9,6 +9,12 @@ inputs:
   - name: symbol
     type: string
     required: true
+  - name: market_type
+    type: select
+    required: false
+    default: spot
+    options: [spot, futures]
+    label: {en_US: Market Type}
   - name: order_id
     type: string
     required: true

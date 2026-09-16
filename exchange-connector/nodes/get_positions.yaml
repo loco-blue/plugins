@@ -1,7 +1,7 @@
 name: get_positions
 label: {en_US: "Get Positions"}
 category: exchange
-description: {en_US: "Fetch open positions for a symbol on the connected exchange account"}
+description: {en_US: "Fetch open futures positions for a symbol on the connected exchange account. Futures only - spot has no position concept, use get_balance for spot holdings."}
 icon: list
 source: nodes/get_positions.py
 

@@ -1,0 +1,23 @@
+name: get_balance
+label: {en_US: "Get Balance"}
+category: exchange
+description: {en_US: "Fetch account asset balances on the connected exchange account"}
+icon: wallet
+source: nodes/get_balance.py
+
+inputs:
+  - name: market_type
+    type: select
+    required: false
+    default: spot
+    options: [spot, futures]
+    label: {en_US: Market Type}
+  - name: testnet
+    type: boolean
+    required: false
+    default: true
+
+outputs:
+  - name: balances
+    type: array
+    description: {en_US: "[{asset, free, locked}]"}

@@ -24,6 +24,8 @@ nodes:
   - nodes/place_order.yaml
   - nodes/get_positions.yaml
   - nodes/cancel_order.yaml
+  - nodes/get_balance.yaml
+  - nodes/set_leverage.yaml
 
 loco_version: ">=0.1.0"
 python_version: ">=3.10"

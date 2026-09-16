@@ -10,7 +10,13 @@ inputs:
     type: string
     required: true
     label: {en_US: Symbol}
-    description: {en_US: "Use the connected exchange's own symbol format, e.g. BTCUSDT (Binance) or BTC-USDT (OKX)"}
+    description: {en_US: "Use the connected exchange's own symbol format, e.g. BTCUSDT (Binance spot/futures), BTC-USDT (OKX spot), or BTC-USDT-SWAP (OKX futures)"}
+  - name: market_type
+    type: select
+    required: false
+    default: spot
+    options: [spot, futures]
+    label: {en_US: Market Type}
   - name: interval
     type: string
     required: false
