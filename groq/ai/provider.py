@@ -6,24 +6,14 @@ Uses official Groq Python client.
 
 import logging
 import re
-from typing import Any
 from collections.abc import AsyncGenerator
+from typing import Any
 
 import httpx
 from groq import APIError, AsyncGroq
-from groq.types.chat import ChatCompletion, ChatCompletionChunk
 
-from loco_sdk import AIProviderPlugin
-from loco_sdk.types import (
-    Delta,
-    FunctionCall,
-    LLMResult,
-    Message,
-    StreamChunk,
-    ToolCall,
-    ToolDefinition,
-    Usage,
-)
+from loco_sdk import OpenAICompatiblePlugin
+from loco_sdk.types import Delta, FunctionCall, Message, StreamChunk, ToolCall, Usage
 
 logger = logging.getLogger(__name__)
 
@@ -35,8 +25,19 @@ _HALLUCINATED_TOOL_RE = re.compile(
 )
 
 
-class GroqProvider(AIProviderPlugin):
+class GroqProvider(OpenAICompatiblePlugin):
     """Groq AI provider supporting fast LLM inference.
+
+    `invoke`/`validate_credentials`/`list_models`/`get_model_info` all come
+    from `OpenAICompatiblePlugin` unchanged — Groq's `AsyncGroq` client
+    exposes the same `.chat.completions.create(**params)` /
+    `choices[0].message` shape as `AsyncOpenAI`, even though it's a
+    different SDK package. `stream()` is overridden here because Groq's
+    streaming response has two real quirks the shared default doesn't
+    handle: usage is reported under `x_groq` instead of a trailing
+    `stream_options` chunk (so Groq's params never set that option), and a
+    hallucinated tool call aborts the SSE stream with a distinct
+    `APIError` this plugin recovers from instead of propagating.
 
     Features:
     - Ultra-fast inference with Groq LPU™
@@ -55,6 +56,8 @@ class GroqProvider(AIProviderPlugin):
         "mixtral-8x7b-32768",
         "gemma2-9b-it",
     ]
+    default_context_window = 8192
+    default_max_output_tokens = 8192
 
     def _get_client(self) -> AsyncGroq:
         """Create Groq client instance.
@@ -74,195 +77,37 @@ class GroqProvider(AIProviderPlugin):
 
         return AsyncGroq(**kwargs)
 
-    async def validate_credentials(self, credentials: dict[str, Any]) -> bool:
-        """Validate credentials by listing models.
-
-        Args:
-            credentials: Must contain "api_key"
-
-        Returns:
-            True if credentials are valid
-        """
-        api_key = credentials.get("api_key")
-        if not api_key:
-            return False
-
-        try:
-            # Temporarily set credentials to test
-            old_credentials = self._credentials
-            self._credentials = credentials
-
-            client = self._get_client()
-            await client.models.list()
-
-            # Restore original credentials
-            self._credentials = old_credentials
-            return True
-        except Exception as e:
-            logger.warning(f"Failed to validate Groq credentials: {e}")
-            self._credentials = old_credentials
-            return False
-
-    def _normalize_messages(
-        self, messages: list[Message]
-    ) -> list[dict[str, Any]]:
-        """Serialize messages to Groq-compatible dicts.
-
-        Groq requires image_url to be an object {"url": "..."}, not a string.
-        Wraps any image_url string values before dumping.
-        """
-        result: list[dict[str, Any]] = []
-        for msg in messages:
-            dumped = msg.model_dump(exclude_none=True)
-            content = dumped.get("content")
-            if isinstance(content, list):
-                normalized: list[dict[str, Any]] = []
-                for part in content:
-                    if part.get("type") == "image_url":
-                        image_url = part.get("image_url")
-                        if isinstance(image_url, str):
-                            normalized.append(
-                                {
-                                    "type": "image_url",
-                                    "image_url": {"url": image_url},
-                                }
-                            )
-                        else:
-                            normalized.append(part)
-                    else:
-                        normalized.append(part)
-                dumped["content"] = normalized
-            result.append(dumped)
-        return result
-
-    async def invoke(
-        self,
-        model: str,
-        messages: list[Message],
-        *,
-        temperature: float = 0.7,
-        max_tokens: int | None = None,
-        tools: list[ToolDefinition] | None = None,
-        stream: bool = False,
-        **kwargs: Any,
-    ) -> LLMResult:
-        """Invoke LLM completion via Groq API."""
-        client = self._get_client()
-
-        # Serialize typed objects to dicts for Groq client
-        raw_messages = self._normalize_messages(messages)
-        raw_tools = (
-            [t.model_dump(exclude_none=True) for t in tools] if tools else None
-        )
-
-        # Build parameters
-        params: dict[str, Any] = {
-            "model": model,
-            "messages": raw_messages,
-            "temperature": temperature,
-        }
-
-        if max_tokens is not None:
-            params["max_tokens"] = max_tokens
-
-        if raw_tools:
-            params["tools"] = raw_tools
-            params["tool_choice"] = kwargs.get("tool_choice", "auto")
-
-        # Additional OpenAI-compatible parameters
-        for key in (
-            "top_p",
-            "frequency_penalty",
-            "presence_penalty",
-            "stop",
-            "response_format",
-        ):
-            if key in kwargs:
-                params[key] = kwargs[key]
-
-        # Call Groq API
-        completion: ChatCompletion = await client.chat.completions.create(
-            **params
-        )
-
-        choice = completion.choices[0]
-        message = choice.message
-
-        # Parse tool calls if present
-        tool_calls = None
-        if message.tool_calls:
-            tool_calls = [
-                ToolCall(
-                    id=tc.id,
-                    type=tc.type,
-                    function=FunctionCall(
-                        name=tc.function.name,
-                        arguments=tc.function.arguments,
-                    ),
-                )
-                for tc in message.tool_calls
-            ]
-
-        return LLMResult(
-            content=message.content or "",
-            tool_calls=tool_calls,
-            usage=Usage(
-                prompt_tokens=(
-                    completion.usage.prompt_tokens if completion.usage else 0
-                ),
-                completion_tokens=(
-                    completion.usage.completion_tokens
-                    if completion.usage
-                    else 0
-                ),
-                total_tokens=(
-                    completion.usage.total_tokens if completion.usage else 0
-                ),
-            ),
-            finish_reason=choice.finish_reason or "stop",
-            model=completion.model,
-        )
-
     async def stream(
         self,
         model: str,
         messages: list[Message],
         **kwargs: Any,
     ) -> AsyncGenerator[StreamChunk, None]:
-        """Stream LLM completion via Groq API."""
+        """Stream LLM completion via Groq API.
+
+        Diverges from the shared default in exactly the two ways Groq's
+        API does: no `stream_options` (Groq doesn't support it, so usage
+        is read from `x_groq` instead), and a try/except around a
+        hallucinated-tool-call abort. Everything else — message
+        normalization, param building, tool-call-delta parsing — reuses
+        the base class.
+        """
         client = self._get_client()
 
-        # Serialize typed objects to dicts for Groq client
         raw_messages = self._normalize_messages(messages)
-
-        # Build parameters
         temperature = kwargs.get("temperature", 0.7)
         max_tokens = kwargs.get("max_tokens")
         tools = kwargs.get("tools")
-        raw_tools = (
-            [t.model_dump(exclude_none=True) for t in tools] if tools else None
+        params = self._build_params(
+            model,
+            raw_messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            tools=tools,
+            stream=True,
+            **kwargs,
         )
 
-        params: dict[str, Any] = {
-            "model": model,
-            "messages": raw_messages,
-            "temperature": temperature,
-            "stream": True,
-        }
-
-        if max_tokens is not None:
-            params["max_tokens"] = max_tokens
-
-        if raw_tools:
-            params["tools"] = raw_tools
-            params["tool_choice"] = kwargs.get("tool_choice", "auto")
-
-        # Additional parameters
-        for key in ("top_p", "frequency_penalty", "presence_penalty", "stop"):
-            if key in kwargs:
-                params[key] = kwargs[key]
-
-        # Stream from Groq API
         groq_stream = await client.chat.completions.create(**params)
 
         try:
@@ -273,34 +118,15 @@ class GroqProvider(AIProviderPlugin):
                 choice = chunk.choices[0]
                 delta = choice.delta
 
-                # Parse delta content
                 content = delta.content if delta.content else None
+                # Groq's delta tool calls carry no `.index` — passing
+                # `with_index=False` keeps that field `None` rather than
+                # raising on the missing attribute.
+                tool_calls = self._parse_delta_tool_calls(
+                    delta.tool_calls, with_index=False
+                )
 
-                # Parse tool calls from delta
-                tool_calls = None
-                if delta.tool_calls:
-                    tool_calls = [
-                        ToolCall(
-                            id=tc.id or "",
-                            type=tc.type or "function",
-                            function=FunctionCall(
-                                name=(
-                                    tc.function.name
-                                    if tc.function and tc.function.name
-                                    else ""
-                                ),
-                                arguments=(
-                                    tc.function.arguments
-                                    if tc.function and tc.function.arguments
-                                    else ""
-                                ),
-                            ),
-                        )
-                        for tc in delta.tool_calls
-                    ]
-
-                # Parse usage if present (usually in final chunk)
-                # Groq may report usage at top-level or under x_groq
+                # Groq may report usage at top-level or under x_groq.
                 usage = None
                 groq_usage = getattr(chunk, "usage", None)
                 if not groq_usage:
@@ -348,43 +174,3 @@ class GroqProvider(AIProviderPlugin):
                 ),
                 finish_reason="tool_calls",
             )
-
-    async def list_models(self) -> list[str]:
-        """List available models from Groq API.
-
-        Returns:
-            List of model identifiers
-
-        Note:
-            This provides runtime model discovery in addition to
-            the static models defined in ai.yaml.
-        """
-        try:
-            client = self._get_client()
-            models_page = await client.models.list()
-
-            # Extract model IDs
-            models = [model.id for model in models_page.data]
-            return models
-        except Exception as e:
-            logger.warning(f"Failed to list Groq models: {e}")
-            # Fallback to static list
-            return self.supported_models
-
-    def get_model_info(self, model: str) -> dict[str, Any]:
-        """Return metadata for a single model.
-
-        Args:
-            model: Model identifier
-
-        Returns:
-            Model metadata dict
-        """
-        # Model info is primarily defined in ai.yaml
-        # This provides a fallback for unknown models
-        return {
-            "model": model,
-            "provider": self.provider_name,
-            "context_window": 8192,  # Conservative default
-            "max_output_tokens": 8192,
-        }
