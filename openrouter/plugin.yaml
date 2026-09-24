@@ -13,7 +13,7 @@ license: MIT
 # Dependencies
 dependencies:
   python:
-    loco-sdk: ">=0.2.9"
+    loco-sdk: ">=0.2.10"
     pydantic: ">=2.0.0"
     openai: ">=1.0.0"
     httpx: ">=0.27.0"

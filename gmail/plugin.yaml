@@ -13,7 +13,7 @@ license: MIT
 # Dependencies
 dependencies:
   python:
-    loco-sdk: ">=0.2.5"
+    loco-sdk: ">=0.2.7"
     httpx: ">=0.27.0"
 
 # Permissions

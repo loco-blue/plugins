@@ -9,7 +9,7 @@ classes. Nothing here branches on market_type beyond that one lookup;
 no such concept and those two nodes have no `market_type` input at all.
 """
 
-from typing import Any
+from typing import Any, cast
 
 import httpx
 
@@ -48,6 +48,16 @@ def _resolve_exchange(
     return adapter_cls, auth
 
 
+def _resolve_futures_exchange(
+    context: dict[str, Any],
+) -> tuple[type[FuturesAdapter], dict[str, Any]]:
+    """Like `_resolve_exchange`, but typed as `FuturesAdapter` for callers
+    that only ever resolve `market_type="futures"` (`get_positions`/
+    `set_leverage` nodes have no `market_type` input at all)."""
+    adapter_cls, auth = _resolve_exchange(context, "futures")
+    return cast(type[FuturesAdapter], adapter_cls), auth
+
+
 async def run_get_klines(inputs: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
     market_type = inputs.get("market_type", "spot")
     adapter_cls, auth = _resolve_exchange(context, market_type)
@@ -80,7 +90,9 @@ async def run_place_order(inputs: dict[str, Any], context: dict[str, Any]) -> di
     async with httpx.AsyncClient() as client:
         adapter = adapter_cls(client, auth, testnet=testnet)
         if leverage is not None:
-            await adapter.set_leverage(inputs["symbol"], leverage)
+            # `futures_only_requested`/`is_futures` above already guarantees
+            # `adapter_cls` is a `FuturesAdapter` whenever leverage is set.
+            await cast(FuturesAdapter, adapter).set_leverage(inputs["symbol"], leverage)
         return await adapter.place_order(
             inputs["symbol"],
             inputs["side"],
@@ -102,7 +114,7 @@ async def run_cancel_order(inputs: dict[str, Any], context: dict[str, Any]) -> d
 
 
 async def run_get_positions(inputs: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
-    adapter_cls, auth = _resolve_exchange(context, "futures")
+    adapter_cls, auth = _resolve_futures_exchange(context)
     testnet = inputs.get("testnet", True)
     async with httpx.AsyncClient() as client:
         adapter = adapter_cls(client, auth, testnet=testnet)
@@ -111,7 +123,7 @@ async def run_get_positions(inputs: dict[str, Any], context: dict[str, Any]) -> 
 
 
 async def run_set_leverage(inputs: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
-    adapter_cls, auth = _resolve_exchange(context, "futures")
+    adapter_cls, auth = _resolve_futures_exchange(context)
     testnet = inputs.get("testnet", True)
     async with httpx.AsyncClient() as client:
         adapter = adapter_cls(client, auth, testnet=testnet)
