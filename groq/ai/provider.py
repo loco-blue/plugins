@@ -95,9 +95,11 @@ class GroqProvider(OpenAICompatiblePlugin):
         client = self._get_client()
 
         raw_messages = self._normalize_messages(messages)
-        temperature = kwargs.get("temperature", 0.7)
-        max_tokens = kwargs.get("max_tokens")
-        tools = kwargs.get("tools")
+        # pop, not get: _build_params below also receives **kwargs, so a
+        # key left in kwargs after being read here is passed twice.
+        temperature = kwargs.pop("temperature", 0.7)
+        max_tokens = kwargs.pop("max_tokens", None)
+        tools = kwargs.pop("tools", None)
         params = self._build_params(
             model,
             raw_messages,
