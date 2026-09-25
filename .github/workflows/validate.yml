@@ -1,0 +1,38 @@
+name: Validate plugins
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install tooling
+        run: pip install -r tools/marketplace/requirements.txt semgrep pip-audit
+      - name: Install minisign
+        run: sudo apt-get update && sudo apt-get install -y minisign
+      - name: Tooling tests
+        run: python -m pytest tools/marketplace/tests -q
+      - name: Changed files
+        run: git diff --name-only "origin/${{ github.base_ref }}...HEAD" > changed.txt
+      - name: Validate manifests
+        run: |
+          python -m tools.marketplace.validate --repo-root . \
+            --changed-files changed.txt --base-ref "origin/${{ github.base_ref }}" \
+            --list-dirs | tee validate.out
+      - name: Semgrep (changed plugins)
+        run: |
+          dirs=$(grep '^plugins/' validate.out || true)
+          if [ -n "$dirs" ]; then semgrep scan --config p/python --error $dirs; fi
+      - name: pip-audit (changed plugins)
+        run: |
+          for d in $(grep '^plugins/' validate.out || true); do
+            if [ -f "$d/requirements.txt" ]; then pip-audit -r "$d/requirements.txt"; fi
+          done

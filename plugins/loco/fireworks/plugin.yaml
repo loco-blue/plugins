@@ -9,6 +9,7 @@ description:
   en_US: Fireworks AI provider plugin — serverless LLM, embedding, and rerank models
 icon: icon.png
 license: MIT
+tags: [ai, llm, embeddings]
 
 # Dependencies
 dependencies:

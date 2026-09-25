@@ -9,6 +9,7 @@ description:
   en_US: OpenRouter provider plugin — unified access to LLM, embedding, and rerank models from 300+ providers
 icon: icon.svg
 license: MIT
+tags: [ai, llm, embeddings]
 
 # Dependencies
 dependencies:

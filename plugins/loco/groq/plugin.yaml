@@ -6,9 +6,10 @@ author: loco
 label:
   en_US: Groq
 description:
-  en_US: A node plugin for Loco
+  en_US: Groq provider plugin — fast LLM inference on Groq LPU
 icon: icon.svg
 license: MIT
+tags: [ai, llm]
 
 # Dependencies
 dependencies:

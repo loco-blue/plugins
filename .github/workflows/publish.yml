@@ -1,0 +1,36 @@
+name: Publish plugins
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+concurrency:
+  group: publish-main
+  cancel-in-progress: false
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: marketplace-publish
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r tools/marketplace/requirements.txt
+      - name: Validate all manifests
+        run: python -m tools.marketplace.validate --repo-root . --all
+      - name: Install minisign
+        run: sudo apt-get update && sudo apt-get install -y minisign
+      - name: Build, upload, ingest
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ vars.R2_BUCKET }}
+          CLOUD_INGEST_URL: ${{ vars.CLOUD_INGEST_URL }}
+          OIDC_AUDIENCE: loco-cloud-marketplace
+          MINISIGN_SECRET_KEY: ${{ secrets.MINISIGN_SECRET_KEY }}
+          MINISIGN_PUBLIC_KEY: ${{ vars.MINISIGN_PUBLIC_KEY }}
+        run: python -m tools.marketplace.publish --repo-root . --commit-sha "${{ github.sha }}"

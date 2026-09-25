@@ -1,0 +1,9 @@
+# Default (including any new namespace with no dedicated line): core team must approve.
+*                   @loco-blue/core
+/.github/           @loco-blue/core
+/tools/             @loco-blue/core
+# Official namespace — core team only.
+/plugins/loco/      @loco-blue/core
+# Community namespace: add a line like
+# /plugins/<namespace>/   @github-user-or-team
+# A PR adding such a line edits CODEOWNERS itself, so it requires @loco-blue/core (admin) approval.

@@ -6,6 +6,7 @@ label: {en_US: Exchange Connector}
 description: {en_US: "Multi-exchange market data and order placement (Binance, OKX)"}
 icon: icon.svg
 license: MIT
+tags: [trading, crypto, finance]
 
 dependencies:
   python:

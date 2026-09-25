@@ -9,6 +9,7 @@ description:
   en_US: Gmail API integration - Send emails, search messages, manage drafts
 icon: icon.svg
 license: MIT
+tags: [email, google, productivity]
 
 # Dependencies
 dependencies:
